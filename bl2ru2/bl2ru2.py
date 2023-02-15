@@ -66,7 +66,7 @@ class Bl2ru2:
         '''
         try:
             with open(".sid_log_file", "w", encoding="utf-8") as f_sid:
-                f_sid.write("{}".format(self._sid_))
+                f_sid.write(f"{self._sid_}")
         except PermissionError as err:
             print(err)
             print("[-] sid not saved, be carefull")
@@ -78,9 +78,9 @@ class Bl2ru2:
         Generate suricata rule for a domain
         '''
         members = domain.split(".")
-        dns_request = ""
-        for member in members:
-            dns_request += "|{:02X}|{}".format(len(member), member)
+        dns_request = "".join(
+            "|{:02X}|{}".format(len(member), member) for member in members
+        )
         rule = (DNS_BASERULE.format(self._org_, name, domain, dns_request, ref, self._sid_))
         self._sid_ += 1
         return rule, self._sid_-1
@@ -95,11 +95,11 @@ class Bl2ru2:
         rule_content = ""
         if uri_params:
             params = uri_params.split("&")
-            rule_content = ' content:"?{}=";'.format(params[0].split("=")[0])
+            rule_content = f' content:"?{params[0].split("=")[0]}=";'
             for param in params[1:]:
                 # escaping ';'
                 param = param.replace(';', r'|3b|')
-                rule_content += ' content:"&{}=";'.format(param.split("=")[0])
+                rule_content += f' content:"&{param.split("=")[0]}=";'
         rule = (URL_BASERULE.format(self._org_, name, uri, uri, rule_content, ref, self._sid_))
         self._sid_ += 1
         return rule, self._sid_ - 1
@@ -221,13 +221,13 @@ def main(args):
         try:
             with open(args.output, "a") as f_out:
                 for rule in rules:
-                    f_out.write("{} \n".format(rule))
+                    f_out.write(f"{rule} \n")
         except PermissionError:
             print("[+] Can't write rule file, permission denied")
             print("[+] Rules not saved, be carefull")
     else:
         for rule in rules:
-            print("{}".format(rule))
+            print(f"{rule}")
 
 
 if __name__ == '__main__':
